@@ -21,6 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+    <head>
+    <link rel="icon" href="/assets/images/logo.png" />
+    </head>
       <body
         className={`${poppins.variable} font-poppins antialiased`}
       >
