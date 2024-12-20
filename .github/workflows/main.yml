@@ -1,0 +1,50 @@
+name: CI/CD for Next.js with Appwrite
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Lint and Test
+        run: |
+          npm run lint
+          npm run test
+
+      - name: Build Next.js App
+        env:
+          NEXT_PUBLIC_APPWRITE_ENDPOINT: ${{ secrets.NEXT_PUBLIC_APPWRITE_ENDPOINT }}
+          NEXT_APPWRITE_KEY: ${{ secrets.NEXT_APPWRITE_KEY }}
+          NEXT_PUBLIC_APPWRITE_PROJECT: ${{ secrets.NEXT_PUBLIC_APPWRITE_PROJECT }}
+          NEXT_PUBLIC_APPWRITE_DATABASE: ${{ secrets.NEXT_PUBLIC_APPWRITE_DATABASE }}
+          NEXT_PUBLIC_APPWRITE_USERS_COLLECTION: ${{ secrets.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION }}
+          NEXT_PUBLIC_APPWRITE_FILES_COLLECTION: ${{ secrets.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION }}
+          NEXT_PUBLIC_APPWRITE_BUCKET: ${{ secrets.NEXT_PUBLIC_APPWRITE_BUCKET }}
+        run: npm run build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-args: '--prod'
+          working-directory: ./
+          github-token: ${{ secrets.GITHUB_TOKEN }}
